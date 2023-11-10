@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>EKG Interpretation</title>
     <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
 
 <body class="bg-gray-200">
@@ -16,6 +17,13 @@
                 <span>Import EKG Data (.CSV)</span>
                 <input type="file" class="hidden" accept=".csv" onchange="handleFileSelect(event)">
             </label>
+            <div id="patientInfo" class="max-w-lg mx-auto mt-6 hidden">
+                <p id="patientName" class="text-lg font-bold"></p>
+                <p id="patientAge" class="text-lg"></p>
+            </div>            
+            <div id="chartContainer" class="max-w-lg mx-auto mt-6 hidden">
+                <canvas id="ecgChart"></canvas>
+            </div>
         </div>
         <div class="mt-10">
             <!-- Likely Heart Conditions Section -->
@@ -43,6 +51,78 @@
                 console.log("File selected:", file.name);
                 // Add further code to process the file
             }
+        }
+    </script>
+    <script>
+        function handleFileSelect(event) {
+            const file = event.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(fileLoadedEvent) {
+                    const textFromFileLoaded = fileLoadedEvent.target.result;
+                    renderChart(textFromFileLoaded);
+                };
+                reader.readAsText(file, "UTF-8");
+            }
+        }
+        
+        let chartInstance = null;
+
+        function renderChart(csvData) {
+            // Split CSV data by lines
+            const lines = csvData.split('\n');
+
+            // Extract ECG data and patient info
+            const ecgDataLine = lines[0];
+            const patientInfoLine = lines[1];
+
+            const dataPoints = ecgDataLine.split(',').map(point => parseFloat(point.trim()));
+            const patientInfo = patientInfoLine.split(',');
+
+            // Display patient info
+            document.getElementById('patientName').textContent = 'Name: ' + patientInfo[0].trim();
+            document.getElementById('patientAge').textContent = 'Age: ' + patientInfo[1].trim();
+
+            // Unhide the info and chart container
+            document.getElementById('patientInfo').classList.remove('hidden');
+            document.getElementById('chartContainer').classList.remove('hidden');
+
+            // Clear existing chart if present
+            if (chartInstance) {
+                chartInstance.destroy();
+            }
+            
+            // Create the chart
+            var ctx = document.getElementById('ecgChart').getContext('2d');
+            chartInstance = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: [...dataPoints.keys()], // X-axis labels
+                    datasets: [{
+                        label: 'EKG Reading',
+                        data: dataPoints, // Y-axis data
+                        borderColor: 'rgb(75, 192, 192)',
+                        tension: 0.1
+                    }]
+                },
+                options: {
+                    scales: {
+                        y: {
+                            beginAtZero: false,
+                            grace: '20%', // Adds padding above and below the data
+                        },
+                        x: {
+                            grace: '5%', // Adds padding to the sides of the data
+                        }
+                    },
+                    elements: {
+                        line: {
+                            tension: 0.4 // Adjust for smoother lines
+                        }
+                    }
+                }
+            });
+            document.getElementById('chartContainer').classList.remove('hidden');
         }
     </script>
     
