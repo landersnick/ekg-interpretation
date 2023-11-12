@@ -28,25 +28,23 @@
         </div>
         <div class="mt-10">
             <!-- Likely Heart Conditions Section -->
-            <div class="max-w-md mx-auto bg-white rounded-xl shadow-md overflow-hidden">
-                <div class="p-8">
-                    <h2 class="block text-lg leading-tight font-medium text-black">Analysis</h2>
-                    <div class="flex justify-between mt-4 text-gray-500">
-                        <span class="font-semibold" style="width: 50%;">Condition</span>
-                        <span class="font-semibold" style="width: 50%; text-align: right;">Confidence</span>
-                    </div>
-                    <div id="conditionsList" class="mt-2 hidden">
-                        <!-- Condition elements will be added here dynamically -->
+            <div id="analysisSection" class="hidden">
+                <div class="max-w-md mx-auto bg-white rounded-xl shadow-md overflow-hidden">
+                    <div class="p-8">
+                        <h2 class="block text-lg leading-tight font-medium text-black">Analysis</h2>
+                        <div class="flex justify-between mt-4 text-gray-500">
+                            <span class="font-semibold" style="width: 50%;">Condition</span>
+                            <span class="font-semibold" style="width: 50%; text-align: right;">Confidence</span>
+                        </div>
+                        <div id="conditionsList" class="mt-2 hidden">
+                            <!-- Condition elements will be added here dynamically -->
+                        </div>
                     </div>
                 </div>
             </div>
-            
             <!-- Additional Information Section -->
             <div class="max-w-md mx-auto bg-white rounded-xl shadow-md overflow-hidden mt-4 hover:shadow-lg transition duration-300 hover:bg-gray-100">
-                <div class="p-8">
-                    <h2 class="block text-lg leading-tight font-medium text-black">Additional Information</h2>
-                    <p class="mt-2 text-gray-500">Percentage improvement since last visit:</p>
-                </div>
+                <div id="stabilityChange" class="p-6 text-lg hidden"></div>
             </div>
         </div>
     </div>
@@ -138,7 +136,8 @@
             })
             .then(response => response.json())
             .then(data => {
-                populateConditions(data);
+                populateConditions(data.conditions); // Assuming this function handles the display of conditions
+                displayStabilityChange(data.stability_change, data.date); // Update to handle stability change and date
             });
         }
 
@@ -184,6 +183,25 @@
             } else {
                 conditionsList.classList.add('hidden');
             }
+        }
+
+        function displayStabilityChange(stabilityChange, date) {
+            const stabilityChangeElement = document.getElementById('stabilityChange');
+            stabilityChangeElement.innerHTML = `Stability change since <strong>${date}</strong>: `;
+
+            const changeDescription = document.createElement('span');
+            changeDescription.textContent = stabilityChange > 0 ? 'Improved' : 'Declined';
+            changeDescription.style.color = stabilityChange > 0 ? 'green' : 'red';
+            
+            const changePercentage = document.createElement('span');
+            changePercentage.textContent = ` ${Math.abs(stabilityChange).toFixed(2)}%`;
+            changePercentage.className = 'font-bold';
+
+            stabilityChangeElement.appendChild(changeDescription);
+            stabilityChangeElement.appendChild(changePercentage);
+            stabilityChangeElement.classList.remove('hidden');
+
+            document.getElementById('analysisSection').classList.remove('hidden');
         }
 
         conditionNameSpan.className = 'text-md font-semibold custom-margin';
