@@ -1,5 +1,6 @@
 #!/bin/sh
-'''exec' "/Users/ethan/Projects/HCI Project/ekg-interpretation/.venv/bin/python3.11" "$0" "$@"
+'''exec' "Users/nickl/Documents/GitHub/ekg-interpretation/.venv/bin/python3.11" "$0" "$@" 
+
 ' '''
 # -*- coding: utf-8 -*-
 import re
